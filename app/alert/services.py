@@ -1,6 +1,14 @@
 
 
+class AlertServiceRepository:
 
-def test():
-    return "test pass"
+    def __init__(self):
+        pass
+
+    def test(self):
+        return "test pass"
+
+
+
+
 
