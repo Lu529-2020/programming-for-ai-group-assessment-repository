@@ -15,3 +15,4 @@ class Alert(BaseModel):
     week_number: Optional[int] = None
     reason: str = ""
     resolved: bool = False
+    severity: str = "medium"  # not stored in DB yet; used for API/UI defaults
