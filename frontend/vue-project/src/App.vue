@@ -5,7 +5,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 const route = useRoute()
 
 const navItems = [
-  { label: 'Dashboard', to: '/', icon: 'dashboard' },
+  { label: 'Dashboard', to: '/dashboard', icon: 'dashboard' },
   { label: 'Students', to: '/students', icon: 'users' },
   { label: 'Modules', to: '/modules', icon: 'modules' },
   { label: 'Attendance', to: '/attendance', icon: 'attendance' },
@@ -16,10 +16,14 @@ const navItems = [
 ]
 
 const activePath = computed(() => route.path)
+const isAuthLayout = computed(() => route.meta?.layout === 'auth')
 </script>
 
 <template>
-  <div class="app-shell">
+  <div v-if="isAuthLayout" class="auth-shell">
+    <RouterView />
+  </div>
+  <div v-else class="app-shell">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-icon">SW</div>
@@ -69,6 +73,10 @@ const activePath = computed(() => route.path)
 </template>
 
 <style scoped>
+.auth-shell {
+  min-height: 100vh;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 260px 1fr;

@@ -6,6 +6,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      redirect: '/login',
+    },
+    {
+      path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
     },
@@ -43,6 +47,12 @@ const router = createRouter({
       path: '/alerts',
       name: 'alerts',
       component: () => import('../views/AlertsView.vue'),
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+      meta: { layout: 'auth' },
     },
   ],
 })
