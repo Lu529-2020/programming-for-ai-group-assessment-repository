@@ -13,6 +13,8 @@ const {
   averageAttendance,
   averageStress,
   submissionOnTimeRate,
+  surveyResponses,
+  grades,
 } = storeToRefs(store)
 
 const absenceThreshold = ref(2)
@@ -56,6 +58,79 @@ const absenceWatchlist = computed(() => {
     })
     .filter((item) => item.absences >= absenceThreshold.value)
     .sort((a, b) => b.absences - a.absences)
+})
+
+const stressVsGrades = computed(() => {
+  const gradeMap: Record<number, { total: number; count: number }> = {}
+  grades.value.forEach((g) => {
+    const entry = gradeMap[g.studentId] ?? { total: 0, count: 0 }
+    gradeMap[g.studentId] = { total: entry.total + g.grade, count: entry.count + 1 }
+  })
+  const stressMap: Record<number, { total: number; count: number }> = {}
+  surveyResponses.value.forEach((s) => {
+    const entry = stressMap[s.studentId] ?? { total: 0, count: 0 }
+    stressMap[s.studentId] = { total: entry.total + s.stressLevel, count: entry.count + 1 }
+  })
+  return students.value
+    .map((s) => {
+      const g = gradeMap[s.id]
+      const st = stressMap[s.id]
+      const avgGrade = g ? Math.round((g.total / g.count) * 10) / 10 : null
+      const avgStress = st ? Math.round((st.total / st.count) * 10) / 10 : null
+      return { student: s, avgGrade, avgStress }
+    })
+    .filter((item) => item.avgGrade !== null && item.avgStress !== null)
+})
+
+const submissionSpread = computed(() => {
+  const total = submissionRecords.value.length
+  const submitted = submissionRecords.value.filter((r) => r.isSubmitted).length
+  const late = submissionRecords.value.filter((r) => r.isSubmitted && r.isLate).length
+  const pending = total - submitted
+  return { total, submitted, late, pending }
+})
+
+const moduleStress = computed(() => {
+  const grouped: Record<number, { total: number; count: number }> = {}
+  surveyResponses.value.forEach((s) => {
+    if (!grouped[s.moduleId || -1]) grouped[s.moduleId || -1] = { total: 0, count: 0 }
+    grouped[s.moduleId || -1].total += s.stressLevel
+    grouped[s.moduleId || -1].count += 1
+  })
+  return modules.value.map((m) => {
+    const bucket = grouped[m.id]
+    const avg = bucket ? Math.round((bucket.total / bucket.count) * 10) / 10 : null
+    return { module: m, avgStress: avg }
+  })
+})
+
+const highRiskStudents = computed(() => {
+  const riskSet = new Map<number, { student: (typeof students.value)[number]; reason: string }>()
+  const attendanceStats: Record<number, { attended: number; total: number }> = {}
+  attendanceRecords.value.forEach((r) => {
+    const entry = attendanceStats[r.studentId] ?? { attended: 0, total: 0 }
+    attendanceStats[r.studentId] = {
+      attended: entry.attended + r.attendedSessions,
+      total: entry.total + r.totalSessions,
+    }
+  })
+  students.value.forEach((s) => {
+    const stat = attendanceStats[s.id]
+    const attendanceRate = stat && stat.total ? Math.round((stat.attended / stat.total) * 100) : 100
+    if (attendanceRate < 75) {
+      riskSet.set(s.id, { student: s, reason: 'Low attendance' })
+    }
+  })
+  surveyResponses.value.forEach((sr) => {
+    if (sr.stressLevel >= 4) {
+      const existing = riskSet.get(sr.studentId)
+      riskSet.set(sr.studentId, {
+        student: students.value.find((s) => s.id === sr.studentId)!,
+        reason: existing ? `${existing.reason} + high stress` : 'High stress',
+      })
+    }
+  })
+  return Array.from(riskSet.values())
 })
 </script>
 
@@ -136,6 +211,100 @@ const absenceWatchlist = computed(() => {
             <div class="meter-fill" :style="{ width: `${item.attendanceRate}%` }"></div>
           </div>
           <p class="muted tiny">Attendance {{ item.attendanceRate }}%</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">FR11</p>
+          <h3>Stress ↔ Grade relationship</h3>
+          <p class="muted">Average stress vs. average grade to spot declining students.</p>
+        </div>
+        <div class="pill pill--accent">{{ stressVsGrades.length }} students compared</div>
+      </div>
+      <div class="table">
+        <div class="table-head">
+          <span>Name</span>
+          <span>Avg stress</span>
+          <span>Avg grade</span>
+        </div>
+        <div v-for="row in stressVsGrades" :key="row.student.id" class="table-row">
+          <span class="strong">{{ row.student.fullName }}</span>
+          <span>
+            <div class="meter meter-sm accent">
+              <div class="meter-fill" :style="{ width: `${(row.avgStress ?? 0) / 5 * 100}%` }"></div>
+            </div>
+            <small>{{ row.avgStress }}</small>
+          </span>
+          <span>
+            <div class="meter meter-sm grade">
+              <div class="meter-fill" :style="{ width: `${row.avgGrade ?? 0}%` }"></div>
+            </div>
+            <small>{{ row.avgGrade }}</small>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel grid-2">
+      <div>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">FR12</p>
+            <h3>Submission distribution</h3>
+            <p class="muted">Submitted / late / pending split.</p>
+          </div>
+        </div>
+        <div class="chips">
+          <span class="pill pill--primary">Submitted: {{ submissionSpread.submitted }}</span>
+          <span class="pill pill--accent">Late: {{ submissionSpread.late }}</span>
+          <span class="pill pill--danger">Pending: {{ submissionSpread.pending }}</span>
+        </div>
+      </div>
+      <div>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">FR13</p>
+            <h3>Module stress</h3>
+            <p class="muted">Average stress per module to find pressure hotspots.</p>
+          </div>
+        </div>
+        <div class="module-stress">
+          <div v-for="row in moduleStress" :key="row.module.id" class="stress-row">
+            <div>
+              <p class="strong">{{ row.module.moduleTitle }}</p>
+              <p class="muted tiny">{{ row.module.moduleCode }}</p>
+            </div>
+            <div class="meter stress">
+              <div class="meter-fill" :style="{ width: `${(row.avgStress ?? 0) / 5 * 100}%` }"></div>
+            </div>
+            <span class="muted small">{{ row.avgStress ?? '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">FR14</p>
+          <h3>High-risk students</h3>
+          <p class="muted">Students with stress ≥ 4 or attendance below 75%.</p>
+        </div>
+        <div class="pill pill--danger">{{ highRiskStudents.length }} flagged</div>
+      </div>
+      <div class="table">
+        <div class="table-head">
+          <span>Name</span>
+          <span>Student #</span>
+          <span>Reason</span>
+        </div>
+        <div v-for="row in highRiskStudents" :key="row.student.id" class="table-row">
+          <span class="strong">{{ row.student.fullName }}</span>
+          <span>{{ row.student.studentNumber }}</span>
+          <span class="muted">{{ row.reason }}</span>
         </div>
       </div>
     </section>
@@ -305,6 +474,15 @@ const absenceWatchlist = computed(() => {
   background: linear-gradient(90deg, #0ea5e9, #f97316);
 }
 
+.meter-sm {
+  height: 6px;
+  margin-bottom: 4px;
+}
+
+.grade .meter-fill {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
 .empty {
   padding: 14px;
   border-radius: 12px;
@@ -315,6 +493,53 @@ const absenceWatchlist = computed(() => {
 
 .tiny {
   font-size: 12px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.table-head,
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+}
+
+.table-head {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.table-row {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.module-stress {
+  display: grid;
+  gap: 10px;
+}
+
+.stress-row {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
 }
 
 @media (max-width: 900px) {

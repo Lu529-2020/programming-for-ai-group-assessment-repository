@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const form = ref({
   email: 'wellbeing.officer@uni.edu',
@@ -26,15 +28,19 @@ function applyShortcut(preset: (typeof shortcuts)[number]) {
 
 async function handleSubmit() {
   if (!form.value.email || !form.value.password) {
-    error.value = '请输入邮箱和密码'
+    error.value = 'Please enter email and password'
     return
   }
   error.value = ''
   isSubmitting.value = true
-  // Mock authentication for prototype
-  await new Promise((resolve) => setTimeout(resolve, 650))
-  isSubmitting.value = false
-  router.push('/dashboard')
+  try {
+    await auth.login(form.value.email, form.value.password)
+    router.push('/dashboard')
+  } catch (e) {
+    error.value = (e as Error).message || 'Login failed'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -100,7 +106,7 @@ async function handleSubmit() {
         <div class="actions">
           <label class="remember">
             <input v-model="form.remember" type="checkbox" />
-            <span>保持登录状态</span>
+            <span>Keep me signed in</span>
           </label>
           <a class="link" href="#">Forgot access?</a>
         </div>
@@ -108,6 +114,10 @@ async function handleSubmit() {
         <button class="primary full" type="submit" :disabled="isSubmitting">
           {{ isSubmitting ? 'Signing in...' : 'Enter workspace' }}
         </button>
+        <p class="muted tiny">
+          No account yet?
+          <RouterLink class="link" to="/register">Go to register</RouterLink>
+        </p>
         <p v-if="error" class="error">{{ error }}</p>
       </form>
 

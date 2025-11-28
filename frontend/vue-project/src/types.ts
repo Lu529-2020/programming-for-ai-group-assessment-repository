@@ -110,3 +110,11 @@ export interface AlertPayload {
   resolved?: boolean
   severity?: 'low' | 'medium' | 'high'
 }
+
+export interface Grade {
+  id: number
+  studentId: number
+  moduleId: number
+  assessmentName: string
+  grade: number
+}

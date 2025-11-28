@@ -73,6 +73,11 @@ const upcomingSubmissions = computed(() => {
 
 const recentSurveys = computed(() => [...surveys.value].reverse().slice(0, 4))
 
+function formatHours(hours?: number | null) {
+  if (hours === undefined || hours === null) return ''
+  return Number(hours).toFixed(2)
+}
+
 async function load() {
   loading.value = true
   error.value = null
@@ -146,7 +151,7 @@ const stats = computed(() => [
             </div>
             <div class="tags">
               <span class="pill">Stress: {{ survey.stressLevel }}</span>
-              <span class="pill pill--primary" v-if="survey.hoursSlept">Sleep: {{ survey.hoursSlept }}h</span>
+              <span class="pill pill--primary" v-if="survey.hoursSlept">Sleep: {{ formatHours(survey.hoursSlept) }}h</span>
             </div>
           </article>
         </div>

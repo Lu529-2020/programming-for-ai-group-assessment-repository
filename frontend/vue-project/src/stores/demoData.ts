@@ -4,6 +4,7 @@ import type {
   Alert,
   AttendanceRecord,
   Enrolment,
+  Grade,
   Module,
   Student,
   SubmissionRecord,
@@ -191,6 +192,17 @@ export const useDemoDataStore = defineStore('demoData', () => {
     },
   ])
 
+  const grades = ref<Grade[]>([
+    { id: 1, studentId: 1, moduleId: 1, assessmentName: 'Coursework 1', grade: 72 },
+    { id: 2, studentId: 2, moduleId: 1, assessmentName: 'Coursework 1', grade: 65 },
+    { id: 3, studentId: 3, moduleId: 1, assessmentName: 'Coursework 1', grade: 58 },
+    { id: 4, studentId: 4, moduleId: 2, assessmentName: 'Essay Draft', grade: 61 },
+    { id: 5, studentId: 3, moduleId: 2, assessmentName: 'Midterm', grade: 55 },
+    { id: 6, studentId: 2, moduleId: 2, assessmentName: 'Midterm', grade: 68 },
+    { id: 7, studentId: 1, moduleId: 3, assessmentName: 'Reflection', grade: 74 },
+    { id: 8, studentId: 4, moduleId: 3, assessmentName: 'Reflection', grade: 63 },
+  ])
+
   const averageAttendance = computed(() => {
     if (!attendanceRecords.value.length) return 0
     const ratios = attendanceRecords.value
@@ -292,6 +304,20 @@ export const useDemoDataStore = defineStore('demoData', () => {
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate)),
   )
 
+  const gradesByModule = computed(() => {
+    const grouped: Record<
+      number,
+      {
+        grades: number[]
+      }
+    > = {}
+    grades.value.forEach((g) => {
+      if (!grouped[g.moduleId]) grouped[g.moduleId] = { grades: [] }
+      grouped[g.moduleId].grades.push(g.grade)
+    })
+    return grouped
+  })
+
   return {
     students,
     modules,
@@ -300,6 +326,7 @@ export const useDemoDataStore = defineStore('demoData', () => {
     submissionRecords,
     surveyResponses,
     alerts,
+    grades,
     averageAttendance,
     moduleAttendance,
     averageStress,
@@ -311,5 +338,6 @@ export const useDemoDataStore = defineStore('demoData', () => {
     attendanceVsStress,
     moduleEnrollmentCounts,
     upcomingSubmissions,
+    gradesByModule,
   }
 })

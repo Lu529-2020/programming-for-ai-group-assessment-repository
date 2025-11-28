@@ -1,22 +1,34 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
 
 const navItems = [
-  { label: 'Dashboard', to: '/dashboard', icon: 'dashboard' },
-  { label: 'Students', to: '/students', icon: 'users' },
-  { label: 'Modules', to: '/modules', icon: 'modules' },
-  { label: 'Attendance', to: '/attendance', icon: 'attendance' },
-  { label: 'Submissions', to: '/submissions', icon: 'submissions' },
-  { label: 'Surveys', to: '/surveys', icon: 'surveys' },
-  { label: 'Analytics', to: '/analytics', icon: 'analytics' },
-  { label: 'Alerts', to: '/alerts', icon: 'alerts' },
+  { label: 'Dashboard', to: '/dashboard', icon: 'dashboard', roles: ['course-director', 'wellbeing-officer'] },
+  { label: 'Students', to: '/students', icon: 'users', roles: ['course-director', 'wellbeing-officer'] },
+  { label: 'Modules', to: '/modules', icon: 'modules', roles: ['course-director'] },
+  { label: 'Attendance', to: '/attendance', icon: 'attendance', roles: ['course-director'] },
+  { label: 'Submissions', to: '/submissions', icon: 'submissions', roles: ['course-director'] },
+  { label: 'Surveys', to: '/surveys', icon: 'surveys', roles: ['wellbeing-officer'] },
+  { label: 'Analytics', to: '/analytics', icon: 'analytics', roles: ['course-director', 'wellbeing-officer'] },
+  { label: 'Alerts', to: '/alerts', icon: 'alerts', roles: ['wellbeing-officer'] },
 ]
 
 const activePath = computed(() => route.path)
 const isAuthLayout = computed(() => route.meta?.layout === 'auth')
+const filteredNav = computed(() => {
+  if (!auth.role) return navItems
+  return navItems.filter((item) => item.roles.includes(auth.role as string))
+})
+
+function logout() {
+  auth.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -35,7 +47,7 @@ const isAuthLayout = computed(() => route.meta?.layout === 'auth')
 
       <nav class="nav">
         <RouterLink
-          v-for="item in navItems"
+          v-for="item in filteredNav"
           :key="item.to"
           :to="item.to"
           class="nav-link"
@@ -60,8 +72,14 @@ const isAuthLayout = computed(() => route.meta?.layout === 'auth')
           <p class="muted">Attendance, submissions, wellbeing pulse, and alerts in one place.</p>
         </div>
         <div class="top-actions">
-          <button class="ghost">Share</button>
-          <button class="primary">New alert</button>
+          <div v-if="auth.currentUser" class="user-chip">
+            <span class="dot"></span>
+            <div>
+              <p class="strong">{{ auth.currentUser.name }}</p>
+              <p class="muted tiny">{{ auth.currentUser.role }}</p>
+            </div>
+          </div>
+          <button class="ghost" @click="logout">Logout</button>
         </div>
       </header>
 
@@ -245,6 +263,28 @@ const isAuthLayout = computed(() => route.meta?.layout === 'auth')
   background: linear-gradient(135deg, #0ea5e9, #0ea5e9 40%, #f97316);
   color: #ffffff;
   border: none;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.user-chip .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+}
+
+.tiny {
+  font-size: 12px;
 }
 
 .view {
