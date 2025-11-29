@@ -103,7 +103,7 @@ onMounted(load)
   <div class="panel">
     <div class="panel-head">
       <div>
-        <p class="eyebrow">FR8 alerts</p>
+        <p class="eyebrow">4.2.6 Alerts</p>
         <h2>Early warnings</h2>
       </div>
       <div class="pill pill--primary">{{ alerts.length }} total</div>

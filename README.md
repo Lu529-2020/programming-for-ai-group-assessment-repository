@@ -18,3 +18,7 @@ source venv/bin/activate
 安装依赖：
 pip install -r requirements.txt
 
+网页：
+FR4/FR5/FR7：汇总关键指标（出勤、压力、按时提交）和近期调查。
+FR7/FR8：最近的福祉调查记录（stress/睡眠等近期 check-in）。
+FR1/FR10：高风险学生列表（早期预警/连续高压力或低出勤的学生）。

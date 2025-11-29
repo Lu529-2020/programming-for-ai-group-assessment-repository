@@ -23,6 +23,7 @@ const alerts = ref<Alert[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+// 4.3: aggregate attendance metric for analysis overview.
 const averageAttendance = computed(() => {
   if (!attendance.value.length) return 0
   const rates = attendance.value
@@ -35,12 +36,14 @@ const averageAttendance = computed(() => {
   return Math.round(rates.reduce((a, b) => a + b, 0) / rates.length)
 })
 
+// 4.3: surface recent wellbeing pulse via average stress.
 const averageStress = computed(() => {
   if (!surveys.value.length) return 0
   const sum = surveys.value.reduce((acc, s) => acc + (s.stressLevel || 0), 0)
   return sum / surveys.value.length
 })
 
+// 4.3: on-time submission rate for analysis overview.
 const submissionOnTimeRate = computed(() => {
   if (!submissions.value.length) return 0
   const submitted = submissions.value.filter((s) => s.isSubmitted)
@@ -57,6 +60,7 @@ const moduleCount = computed(() => {
   alerts.value.forEach((r) => r.moduleId && ids.add(r.moduleId))
   return ids.size
 })
+// 4.3: combine stress signals and alerts to show at-risk students.
 const highRiskStudents = computed(() => {
   const stressIds = new Set(surveys.value.filter((s) => s.stressLevel >= 4).map((s) => s.studentId))
   const alertIds = new Set(activeAlerts.value.map((a) => a.studentId))
@@ -71,6 +75,7 @@ const upcomingSubmissions = computed(() => {
     .slice(0, 6)
 })
 
+// 4.4.1: pull most recent wellbeing check-ins.
 const recentSurveys = computed(() => [...surveys.value].reverse().slice(0, 4))
 
 function formatHours(hours?: number | null) {
@@ -119,7 +124,7 @@ const stats = computed(() => [
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR4, FR5, FR7 overview</p>
+          <p class="eyebrow">4.3 Analysis overview</p>
           <h2>Key signals</h2>
         </div>
         <div class="pill pill--primary">{{ students.length }} students • {{ moduleCount }} modules</div>
@@ -136,7 +141,7 @@ const stats = computed(() => [
       <div class="panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">FR7 & FR8</p>
+            <p class="eyebrow">4.4.1 Wellbeing check-ins</p>
             <h3>Recent wellbeing check-ins</h3>
           </div>
           <div class="pill pill--accent">{{ recentSurveys.length }} entries</div>
@@ -160,7 +165,7 @@ const stats = computed(() => [
       <div class="panel">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">FR1 & FR10</p>
+            <p class="eyebrow">4.3.2 Risk detection</p>
             <h3>At-risk students</h3>
           </div>
           <div class="pill pill--danger">{{ highRiskStudents.length }} flagged</div>
@@ -181,7 +186,7 @@ const stats = computed(() => [
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR5 deadlines</p>
+          <p class="eyebrow">4.3.3 Submission deadlines</p>
           <h3>Upcoming submissions</h3>
         </div>
         <div class="pill pill--primary">Sorted by due date</div>

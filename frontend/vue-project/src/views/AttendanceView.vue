@@ -110,7 +110,7 @@ onMounted(load)
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR4</p>
+        <p class="eyebrow">4.2.3 Attendance records</p>
           <h2>Attendance by week</h2>
         </div>
         <div class="pill pill--primary">{{ attendanceByWeek.length }} weeks tracked</div>

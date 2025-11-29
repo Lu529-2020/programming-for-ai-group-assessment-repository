@@ -19,7 +19,7 @@ const rows = computed(() =>
   <div class="panel">
     <div class="panel-head">
       <div>
-        <p class="eyebrow">FR3</p>
+        <p class="eyebrow">4.2.2 Modules</p>
         <h2>Modules and enrolments</h2>
       </div>
       <div class="pill pill--primary">{{ modules.length }} modules</div>

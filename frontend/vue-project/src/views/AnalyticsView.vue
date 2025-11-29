@@ -60,6 +60,7 @@ const absenceWatchlist = computed(() => {
     .sort((a, b) => b.absences - a.absences)
 })
 
+// 4.4.3: correlate stress and grades per student.
 const stressVsGrades = computed(() => {
   const gradeMap: Record<number, { total: number; count: number }> = {}
   grades.value.forEach((g) => {
@@ -82,6 +83,7 @@ const stressVsGrades = computed(() => {
     .filter((item) => item.avgGrade !== null && item.avgStress !== null)
 })
 
+// 4.3.3: submission completion distribution.
 const submissionSpread = computed(() => {
   const total = submissionRecords.value.length
   const submitted = submissionRecords.value.filter((r) => r.isSubmitted).length
@@ -90,6 +92,7 @@ const submissionSpread = computed(() => {
   return { total, submitted, late, pending }
 })
 
+// 4.4.4: average stress per module for hotspot detection.
 const moduleStress = computed(() => {
   const grouped: Record<number, { total: number; count: number }> = {}
   surveyResponses.value.forEach((s) => {
@@ -104,6 +107,7 @@ const moduleStress = computed(() => {
   })
 })
 
+// 4.3.4: combine stress >=4 and low attendance to flag risk.
 const highRiskStudents = computed(() => {
   const riskSet = new Map<number, { student: (typeof students.value)[number]; reason: string }>()
   const attendanceStats: Record<number, { attended: number; total: number }> = {}
@@ -155,7 +159,7 @@ const highRiskStudents = computed(() => {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR8</p>
+          <p class="eyebrow">4.4.2 Attendance vs submissions</p>
           <h3>Attendance vs submission completion</h3>
           <p class="muted">Blended engagement score by module. Sorts by attendance to focus on lagging cohorts.</p>
         </div>
@@ -186,7 +190,7 @@ const highRiskStudents = computed(() => {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR10</p>
+          <p class="eyebrow">4.3.4 Absence watchlist</p>
           <h3>Absence watchlist</h3>
           <p class="muted">Highlight students with repeated absences. Adjust the threshold to tune alerts.</p>
         </div>
@@ -218,7 +222,7 @@ const highRiskStudents = computed(() => {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR11</p>
+          <p class="eyebrow">4.4.3 Stress vs grades</p>
           <h3>Stress ↔ Grade relationship</h3>
           <p class="muted">Average stress vs. average grade to spot declining students.</p>
         </div>
@@ -252,7 +256,7 @@ const highRiskStudents = computed(() => {
       <div>
         <div class="panel-head">
           <div>
-            <p class="eyebrow">FR12</p>
+            <p class="eyebrow">4.3.3 Submission distribution</p>
             <h3>Submission distribution</h3>
             <p class="muted">Submitted / late / pending split.</p>
           </div>
@@ -266,7 +270,7 @@ const highRiskStudents = computed(() => {
       <div>
         <div class="panel-head">
           <div>
-            <p class="eyebrow">FR13</p>
+            <p class="eyebrow">4.4.4 Module stress</p>
             <h3>Module stress</h3>
             <p class="muted">Average stress per module to find pressure hotspots.</p>
           </div>
@@ -289,7 +293,7 @@ const highRiskStudents = computed(() => {
     <section class="panel">
       <div class="panel-head">
         <div>
-          <p class="eyebrow">FR14</p>
+          <p class="eyebrow">4.3.5 High-risk students</p>
           <h3>High-risk students</h3>
           <p class="muted">Students with stress ≥ 4 or attendance below 75%.</p>
         </div>

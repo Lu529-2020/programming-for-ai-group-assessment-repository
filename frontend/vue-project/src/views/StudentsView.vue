@@ -42,6 +42,7 @@ const selectedStudent = computed(() => students.value.find((s) => s.id === selec
 const showWellbeing = computed(() => !auth.role || auth.role === 'wellbeing-officer')
 const showAcademic = computed(() => !auth.role || auth.role === 'course-director')
 
+// 4.2: aggregate enrolments with attendance/submission/grade/stress for selected student.
 const studentModules = computed(() => {
   if (!selectedStudent.value) return []
   return enrolments.value
@@ -78,6 +79,7 @@ const studentModules = computed(() => {
     .filter((item) => item.module)
 })
 
+// 4.4.1: stress trend per student for wellbeing officer view.
 const studentStressTrend = computed(() => {
   if (!selectedStudent.value) return []
   return surveyResponses.value
@@ -214,7 +216,7 @@ onMounted(loadStudents)
   <div class="panel">
     <div class="panel-head">
       <div>
-        <p class="eyebrow">FR2</p>
+        <p class="eyebrow">4.2.1 Students</p>
         <h2>Students</h2>
         <p class="muted">Basic profile plus current risk sentiment.</p>
       </div>

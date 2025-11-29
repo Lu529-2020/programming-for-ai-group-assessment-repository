@@ -97,7 +97,7 @@ onMounted(load)
   <div class="panel">
     <div class="panel-head">
       <div>
-        <p class="eyebrow">FR7</p>
+        <p class="eyebrow">4.2.5 Surveys</p>
         <h2>Wellbeing survey responses</h2>
       </div>
       <div class="pill pill--primary">{{ records.length }} entries</div>

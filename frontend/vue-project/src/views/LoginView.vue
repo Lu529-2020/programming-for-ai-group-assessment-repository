@@ -85,7 +85,7 @@ async function handleSubmit() {
           <h2>Sign in to wellbeing workspace</h2>
           <p class="muted">Use your role-based demo account to explore the prototype.</p>
         </div>
-        <div class="pill pill--accent">FR0 • Authentication</div>
+        <div class="pill pill--accent">Access • Authentication</div>
       </div>
 
       <form class="form" @submit.prevent="handleSubmit">

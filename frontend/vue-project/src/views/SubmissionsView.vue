@@ -103,7 +103,7 @@ onMounted(load)
   <div class="panel">
     <div class="panel-head">
       <div>
-        <p class="eyebrow">FR5</p>
+        <p class="eyebrow">4.2.4 Submissions</p>
         <h2>Coursework submissions</h2>
       </div>
       <div class="pill pill--primary">{{ records.length }} records</div>

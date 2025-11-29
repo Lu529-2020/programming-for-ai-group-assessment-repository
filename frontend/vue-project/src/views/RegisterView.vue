@@ -48,7 +48,7 @@ async function handleSubmit() {
           <h2>Register an account</h2>
           <p class="muted">Pick a role and the workspace will filter data accordingly.</p>
         </div>
-        <div class="pill pill--primary">FR0 • Registration</div>
+        <div class="pill pill--primary">Access • Registration</div>
       </div>
 
       <form class="form" @submit.prevent="handleSubmit">
